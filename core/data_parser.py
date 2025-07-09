@@ -6,7 +6,10 @@ from filter_engine import filter_item
 
 import sys
 import os
-sys.path.append("D:/learning/skinport_sniper")
+
+from pathlib import Path
+project_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(project_root))
 from bot.discord_bot import send_to_discord, bot
 
 load_dotenv()
