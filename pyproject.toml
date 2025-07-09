@@ -1,0 +1,21 @@
+[project]
+name = "skinport-sniper"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "myzra",email = "myzrahfortnite@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+
+]
+
+[tool.poetry]
+name = "skinport_sniper"
+package-mode = false
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
