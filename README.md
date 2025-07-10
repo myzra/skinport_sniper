@@ -59,7 +59,7 @@ cd ..
 poetry run python .\fastapi\run.py
 ```
 ### 🌐 Open in your browser
-`http://127.0.0.1:8000`
+`http://localhost:8000`
 
 # ⚙️ Environment Variables Setup
 > [!IMPORTANT]
