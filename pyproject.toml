@@ -10,7 +10,13 @@ requires-python = ">=3.12"
 dependencies = [
     "dotenv (>=0.9.9,<0.10.0)",
     "requests (>=2.32.4,<3.0.0)",
-    "discord (>=2.3.2,<3.0.0)"
+    "discord (>=2.3.2,<3.0.0)",
+    "fastapi (>=0.116.0,<0.117.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "aiofiles (>=24.1.0,<25.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "psutil (>=7.0.0,<8.0.0)"
 
 ]
 
@@ -18,6 +24,9 @@ dependencies = [
 name = "skinport_sniper"
 package-mode = false
 
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = {extras = ["standard"], version = "^0.35.0"}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
