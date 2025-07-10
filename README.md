@@ -145,9 +145,10 @@ API_URL=http://localhost:3000/skinport-live
 | `poetry.lock`         | Locks the exact versions of Python dependencies|
 | `pyproject.toml`      | Declares Python dependencies and project config for Poetry|
 | `.gitignore`          | Specifies files and folders to be ignored by Git|
+| `LICENSE`            | Contains the project license (e.g., MIT, GPL) |
 | `README.md`           | Documentation and usage guide                |
 
 ## 👨‍💻 Author
 
 Created by [myzra](https://github.com/myzra) \
-Licensed under the MIT License
+[Licensed under the MIT License](LICENSE)
