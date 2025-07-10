@@ -7,7 +7,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 log_file_path = os.path.join(script_dir, '..', 'logs', 'listings.txt')
 
 SCRIPT_PARAMS_FILE = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'web', 'webui', 'script_params.json')
+    os.path.join(os.path.dirname(__file__), '..', 'fastapi', 'app', 'script_params.json')
 )
 
 def get_params() -> Dict[str, Any]:

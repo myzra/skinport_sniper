@@ -7,6 +7,7 @@ import json
 import subprocess
 import sys
 import signal
+from typing import List, Dict, Any
 import psutil
 from datetime import datetime
 from .models import FilterForm, SaveFilterForm, FilterFormData, SaveFilterFormData, EXTERIOR_CHOICES
@@ -321,8 +322,6 @@ async def delete_filter(filter_id: int):
     except Exception as e:
         return JSONResponse({'status': 'error', 'message': str(e)})
 
-# === OPTIONAL: Keep only if you need form-based operations ===
-
 @router.post("/filter", response_class=HTMLResponse)
 async def filter_items(
     request: Request,
@@ -365,3 +364,30 @@ async def filter_items(
         "saved_filters": load_saved_filters(),
         "script_running": is_script_running()
     })
+
+@router.get("/get-filters", response_model=List[Dict[str, Any]])
+async def get_saved_filters():
+    """
+    Read saved filters from a JSON file and return them
+    """
+    try:
+        base_dir = os.path.dirname(__file__)  # Pfad zu index.py
+        json_file_path = os.path.join(base_dir, '..', 'saved_filters.json')  # Gehe ein Verzeichnis hoch
+
+        json_file_path = os.path.abspath(json_file_path)
+
+        if not os.path.exists(json_file_path):
+            return []
+        
+        with open(json_file_path, 'r', encoding='utf-8') as file:
+            filters_data = json.load(file)
+        
+        if isinstance(filters_data, list):
+            return filters_data
+        else:
+            return [filters_data]
+            
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Invalid JSON file format")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading filters: {str(e)}")

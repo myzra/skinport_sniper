@@ -1,206 +1,213 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skinport Sniper</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cs2 Skinport-Sniper</h1>
+            <p>Real-time Skinport sniper tool with custom filters and Discord notifications. ~ by myzra</p>
+        </div>
 
-{% block page_title %}Filter Dashboard{% endblock %}
-
-{% block content %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
-
-<div class="row">
-    <!-- Filter Form Column -->
-    <div class="col-md-8">
-        <div class="card filter-card">
-            <div class="card-header">
-                <h5 class="mb-0">Filter Parameters</h5>
+        <div class="dashboard-grid">
+            <!-- Main Filter Form -->
+            <div class="main-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-filter"></i>
+                        <h3>Filter Parameters</h3>
+                    </div>
+                    <form id="filterForm">
+                        <div class="form-group">
+                            <label class="form-label">Names</label>
+                            <input type="text" id="id_names" class="form-control" placeholder="Karambit, Butterfly Doppler, Slaugther">
+                            <div class="form-text">Separate multiple names with commas</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Min Price</label>
+                                <input type="number" id="id_min_price" class="form-control" placeholder="50" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Price</label>
+                                <input type="number" id="id_max_price" class="form-control" placeholder="3000" step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Patterns</label>
+                            <input type="text" id="id_patterns" class="form-control" placeholder="100, 31, 187, 420">
+                            <div class="form-text">Separate multiple patterns with commas</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Min Wear</label>
+                                <input type="number" id="id_min_wear" class="form-control" placeholder="0.001" step="0.0001">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Wear</label>
+                                <input type="number" id="id_max_wear" class="form-control" placeholder="0.5" step="0.0001">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Exterior</label>
+                            <select id="id_exterior" class="form-control">
+                                <option value="">Select exterior condition</option>
+                                <option value="Factory New">Factory New</option>
+                                <option value="Minimal Wear">Minimal Wear</option>
+                                <option value="Field-Tested">Field-Tested</option>
+                                <option value="Well-Worn">Well-Worn</option>
+                                <option value="Battle-Scarred">Battle-Scarred</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-buttons">
+                            <div class="btn-group">
+                                <button type="button" id="startButton" class="btn btn-success">
+                                    <i class="fas fa-play"></i> Start Script
+                                </button>
+                                <button type="button" id="restartButton" class="btn btn-info" disabled>
+                                    <i class="fas fa-sync-alt"></i> Restart
+                                </button>
+                            </div>
+                            <button type="button" id="stopButton" class="btn btn-danger" disabled>
+                                <i class="fas fa-stop"></i> Stop Script
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Script Status Card -->
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Script Status</h3>
+                    </div>
+                    <div class="status-indicator">
+                        <div id="statusIndicator" class="status-dot"></div>
+                        <span id="statusText">Script is stopped</span>
+                    </div>
+                    <div class="script-output">
+                        <pre id="outputText">Waiting for script output...</pre>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <form id="filterForm">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label for="id_names" class="form-label">Names:</label>
-                            {{ filter_form.names }}
-                            <small class="form-text text-muted">Separate multiple names with commas</small>
-                        </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Save Filter Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-save"></i>
+                        <h3>Save Filter</h3>
                     </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="id_min_price" class="form-label">Min Price:</label>
-                            {{ filter_form.min_price }}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="id_max_price" class="form-label">Max Price:</label>
-                            {{ filter_form.max_price }}
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label for="id_patterns" class="form-label">Patterns:</label>
-                            {{ filter_form.patterns }}
-                            <small class="form-text text-muted">Separate multiple patterns with commas</small>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="id_min_wear" class="form-label">Min Wear:</label>
-                            {{ filter_form.min_wear }}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="id_max_wear" class="form-label">Max Wear:</label>
-                            {{ filter_form.max_wear }}
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label for="id_exterior" class="form-label">Exterior:</label>
-                            {{ filter_form.exterior }}
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between control-buttons">
-                        <div>
-                            <button type="button" id="startButton" class="btn btn-success me-2" {{ 'disabled' if script_running else '' }}>
-                                <i class="fas fa-play"></i> Start Script
-                            </button>
-                            <button type="button" id="restartButton" class="btn btn-info" {{ 'disabled' if not script_running else '' }}>
-                                <i class="fas fa-sync-alt"></i> Restart Script
-                            </button>
-                        </div>
-                        <button type="button" id="stopButton" class="btn btn-danger" {{ 'disabled' if not script_running else '' }}>
-                            <i class="fas fa-stop"></i> Stop Script
+                    <div class="input-group">
+                        <input type="text" id="filterName" class="form-control" placeholder="Filter name">
+                        <button id="saveFilterBtn" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save
                         </button>
                     </div>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Script Status Card -->
-        <div class="card status-card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">Script Status</h5>
-            </div>
-            <div class="card-body">
-                <div class="status-indicator d-flex align-items-center">
-                    <div id="statusIndicator" class="status-dot {{ 'active' if script_running else '' }}"></div>
-                    <span id="statusText" class="ms-2">{{ 'Script is running' if script_running else 'Script is stopped' }}</span>
                 </div>
-                <div id="scriptOutput" class="script-output mt-3">
-                    <pre class="output-text">Waiting for script output...</pre>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        function fetchScriptOutput() {
-            fetch("/get-script-output/")
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector('.output-text').textContent = data.output;
-                });
-            }
-            setInterval(fetchScriptOutput, 5000);
-            window.onload = fetchScriptOutput;
-    </script>
-    <!-- Save/Load Filters Column -->
-    <div class="col-md-4">
-        <div class="card save-card">
-            <div class="card-header">
-                <h5 class="mb-0">Save Current Filter</h5>
-            </div>
-            <div class="card-body">
-                <div class="input-group mb-3">
-                    <input type="text" id="filterName" class="form-control" placeholder="Filter name">
-                    <button class="btn btn-primary" type="button" id="saveFilterBtn">
-                        <i class="fas fa-save"></i> Save
+
+                <!-- Form Actions Card -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header">
+                        <i class="fas fa-tools"></i>
+                        <h3>Actions</h3>
+                    </div>
+                    <button id="clearFormButton" class="btn btn-warning" style="width: 100%;">
+                        <i class="fas fa-eraser"></i> Clear Form
                     </button>
                 </div>
-            </div>
-        </div>
-        
-        <div class="card load-card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">Saved Filters</h5>
-            </div>
-            <div class="card-body">
-                <div class="saved-filters-list">
-                    {% if saved_filters %}
-                        <div class="list-group">
-                            {% for filter in saved_filters %}
-                            <a href="#" class="list-group-item list-group-item-action saved-filter" data-filter-id="{{ filter.id }}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>{{ filter.name }}</span>
-                                    <div>
-                                        <small class="text-muted me-3">{{ filter.created_at.strftime('%b %d, %Y') }}</small>
-                                        <button class="btn btn-sm btn-outline-danger delete-filter-btn" data-filter-id="{{ filter.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </a>
-                            {% endfor %}
+
+                <!-- Saved Filters Card -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header">
+                        <i class="fas fa-bookmark"></i>
+                        <h3>Saved Filters</h3>
+                    </div>
+                    <div class="saved-filters-list" id="savedFiltersList">
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No saved filters yet</p>
                         </div>
-                    {% else %}
-                        <p class="text-center text-muted">No saved filters yet</p>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Save Filter Modal -->
-<div class="modal fade" id="saveSuccessModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <!-- Success Modal -->
+    <div class="modal" id="saveSuccessModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Success</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h3 class="modal-title">Success</h3>
             </div>
             <div class="modal-body">
                 <p>Filter saved successfully!</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="closeModal('saveSuccessModal')">Close</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Delete Filter Confirmation Modal -->
-<div class="modal fade" id="deleteFilterModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteFilterModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h3 class="modal-title">Confirm Deletion</h3>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete this filter?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+                <button class="btn btn-secondary" onclick="closeModal('deleteFilterModal')">Cancel</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
             </div>
         </div>
     </div>
-</div>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    $(document).ready(function() {
+    <script>
+        // Global variables
         let filterIdToDelete = null;
-        
-        // Start button click
-        $('#startButton').click(function() {
+        let savedFilters = [];
+        let scriptRunning = false;
+        let scriptOutputInterval = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            loadSavedFilters();
+            startScriptOutputPolling();
+        });
+
+        // Event listeners
+        function initializeEventListeners() {
+            document.getElementById('startButton').addEventListener('click', startScript);
+            document.getElementById('restartButton').addEventListener('click', restartScript);
+            document.getElementById('stopButton').addEventListener('click', stopScript);
+            document.getElementById('saveFilterBtn').addEventListener('click', saveFilter);
+            document.getElementById('clearFormButton').addEventListener('click', clearForm);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteFilter);
+        }
+
+        // Script control functions
+        function startScript() {
             const formData = getFormData();
-            
-            if (!validateFormData(formData)) {
-                return;
-            }
+            if (!validateFormData(formData)) return;
             
             $.ajax({
                 url: '/start-script/',
@@ -219,22 +226,16 @@
                     showNotification('Server error occurred', 'danger');
                 }
             });
-        });
-        
-        // Restart button click
-        $('#restartButton').click(function() {
+        }
+
+        function restartScript() {
             const formData = getFormData();
-            
-            if (!validateFormData(formData)) {
-                return;
-            }
-            
-            // First stop the script
+            if (!validateFormData(formData)) return;
+
             $.ajax({
                 url: '/stop-script/',
                 type: 'POST',
                 success: function(response) {
-                    // Then start it again with new parameters
                     $.ajax({
                         url: '/start-script/',
                         type: 'POST',
@@ -257,23 +258,9 @@
                     showNotification('Server error occurred when stopping script', 'danger');
                 }
             });
-        });
-        
-        // Helper function to get form data
-        function getFormData() {
-            return {
-                names: $('#id_names').val() || '',
-                min_price: $('#id_min_price').val() || '',
-                max_price: $('#id_max_price').val() || '',
-                patterns: $('#id_patterns').val() || '',
-                min_wear: $('#id_min_wear').val() || '',
-                max_wear: $('#id_max_wear').val() || '',
-                exterior: $('#id_exterior').val() || ''
-            };
         }
-        
-        // Stop button click
-        $('#stopButton').click(function() {
+
+        function stopScript() {
             $.ajax({
                 url: '/stop-script/',
                 type: 'POST',
@@ -289,21 +276,61 @@
                     showNotification('Server error occurred', 'danger');
                 }
             });
-        });
-        
-        // Save filter button click
-        $('#saveFilterBtn').click(function() {
+        }
+
+        // Form functions
+        function getFormData() {
+            return {
+                names: document.getElementById('id_names').value || '',
+                min_price: document.getElementById('id_min_price').value || '',
+                max_price: document.getElementById('id_max_price').value || '',
+                patterns: document.getElementById('id_patterns').value || '',
+                min_wear: document.getElementById('id_min_wear').value || '',
+                max_wear: document.getElementById('id_max_wear').value || '',
+                exterior: document.getElementById('id_exterior').value || ''
+            };
+        }
+
+        function validateFormData(formData) {
+            if (formData.min_price && formData.max_price) {
+                if (parseFloat(formData.min_price) > parseFloat(formData.max_price)) {
+                    showNotification('Min price cannot be greater than max price', 'warning');
+                    return false;
+                }
+            }
+            
+            if (formData.min_wear && formData.max_wear) {
+                if (parseFloat(formData.min_wear) > parseFloat(formData.max_wear)) {
+                    showNotification('Min wear cannot be greater than max wear', 'warning');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function clearForm() {
+            document.getElementById('id_names').value = '';
+            document.getElementById('id_min_price').value = '';
+            document.getElementById('id_max_price').value = '';
+            document.getElementById('id_patterns').value = '';
+            document.getElementById('id_min_wear').value = '';
+            document.getElementById('id_max_wear').value = '';
+            document.getElementById('id_exterior').value = '';
+            
+            showNotification('Form cleared successfully', 'info');
+        }
+
+        // Filter management functions
+        function saveFilter() {
             const filterName = $('#filterName').val();
             
             if (!filterName) {
                 showNotification('Please enter a filter name', 'warning');
                 return;
             }
-            
-            // Get current form values
             const formData = getFormData();
             
-            // Debug: Log form data to console
             console.log('Form data being saved:', formData);
             
             const saveData = {
@@ -317,7 +344,6 @@
                 exterior: formData.exterior
             };
             
-            // Debug: Log save data to console
             console.log('Save data being sent:', saveData);
             
             $.ajax({
@@ -327,231 +353,230 @@
                 data: JSON.stringify(saveData),
                 success: function(response) {
                     if (response.status === 'success') {
-                        $('#saveSuccessModal').modal('show');
-                        
-                        const newFilter = `
-                            <a href="#" class="list-group-item list-group-item-action saved-filter" data-filter-id="${response.filter_id}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>${response.filter_name}</span>
-                                    <div>
-                                        <small class="text-muted me-3">Just now</small>
-                                        <button class="btn btn-sm btn-outline-danger delete-filter-btn" data-filter-id="${response.filter_id}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </a>
-                        `;
-                        
-                        if ($('.saved-filters-list .list-group').length === 0) {
-                            $('.saved-filters-list').html('<div class="list-group">' + newFilter + '</div>');
-                        } else {
-                            $('.saved-filters-list .list-group').prepend(newFilter);
-                        }
-                        
                         $('#filterName').val('');
-                        bindFilterClickEvents();
+                        
+                        const newFilter = {
+                            id: response.filter_id,
+                            name: response.filter_name,
+                            created_at: new Date().toISOString(),
+                            names: formData.names,
+                            min_price: formData.min_price,
+                            max_price: formData.max_price,
+                            patterns: formData.patterns,
+                            min_wear: formData.min_wear,
+                            max_wear: formData.max_wear,
+                            exterior: formData.exterior
+                        };
+                        
+                        savedFilters.unshift(newFilter);
+                        
+                        renderSavedFilters();
+                        
+                        showNotification('Filter saved successfully', 'success');
+                        
                     } else {
                         showNotification('Error: ' + response.message, 'danger');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
                     showNotification('Server error occurred', 'danger');
                 }
             });
-        });
-        
-        // Delete filter button click
-        $(document).on('click', '.delete-filter-btn', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        }
+
+        function loadFilter(filterId) {
+            const filter = savedFilters.find(f => f.id === filterId);
+            if (!filter) return;
             
-            filterIdToDelete = $(this).data('filter-id');
-            $('#deleteFilterModal').modal('show');
-        });
-        
-        // Confirm delete button click
-        $('#confirmDeleteBtn').click(function() {
-            if (filterIdToDelete) {
-                $.ajax({
-                    url: '/delete-filter/0'.replace('0', filterIdToDelete),
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Remove filter from list
-                            $(`.saved-filter[data-filter-id="${filterIdToDelete}"]`).remove();
-                            
-                            // Show notification
-                            showNotification('Filter deleted successfully', 'success');
-                            
-                            // Check if there are any filters left
-                            if ($('.saved-filters-list .list-group-item').length === 0) {
-                                $('.saved-filters-list').html('<p class="text-center text-muted">No saved filters yet</p>');
-                            }
-                        } else {
-                            showNotification('Error: ' + response.message, 'danger');
-                        }
-                        
-                        // Close modal
-                        $('#deleteFilterModal').modal('hide');
-                    },
-                    error: function() {
-                        showNotification('Server error occurred', 'danger');
-                        $('#deleteFilterModal').modal('hide');
-                    }
-                });
-            }
-        });
-        
-        // Load saved filter click
-        function bindFilterClickEvents() {
-        // Load saved filter click event using axios (with debugging)
-        $(document).on('click', '.saved-filter', async function(e) {
-    e.preventDefault();
-    
-    console.log('Filter clicked!'); // Debug log
-    
-    const filterId = $(this).data('filter-id');
-    console.log('Filter ID:', filterId); // Debug log
-    
-    try {
-        console.log('Making axios request to:', `/load-filter/${filterId}`); // Debug log
-        const response = await axios.get(`/load-filter/${filterId}`);
-        
-        console.log('Response received:', response.data); // Debug log
-        
-        if (response.data.status === 'success') {
-            // Debug: Log the filter data
-            console.log('Filter data:', response.data.filter);
-            
-            // Fill form with saved filter data
-            $('#id_names').val(response.data.filter.names);
-            $('#id_min_price').val(response.data.filter.min_price);
-            $('#id_max_price').val(response.data.filter.max_price);
-            $('#id_patterns').val(response.data.filter.patterns);
-            $('#id_min_wear').val(response.data.filter.min_wear);
-            $('#id_max_wear').val(response.data.filter.max_wear);
-            $('#id_exterior').val(response.data.filter.exterior);
-            
-            // Debug: Log what we're trying to set
-            console.log('Setting values:', {
-                names: response.data.filter.names,
-                min_price: response.data.filter.min_price,
-                max_price: response.data.filter.max_price,
-                patterns: response.data.filter.patterns,
-                min_wear: response.data.filter.min_wear,
-                max_wear: response.data.filter.max_wear,
-                exterior: response.data.filter.exterior
-            });
-            
-            // Debug: Check if elements exist
-            console.log('Form elements found:', {
-                names: $('#id_names').length,
-                min_price: $('#id_min_price').length,
-                max_price: $('#id_max_price').length,
-                patterns: $('#id_patterns').length,
-                min_wear: $('#id_min_wear').length,
-                max_wear: $('#id_max_wear').length,
-                exterior: $('#id_exterior').length
-            });
+            document.getElementById('id_names').value = filter.names;
+            document.getElementById('id_min_price').value = filter.min_price;
+            document.getElementById('id_max_price').value = filter.max_price;
+            document.getElementById('id_patterns').value = filter.patterns;
+            document.getElementById('id_min_wear').value = filter.min_wear;
+            document.getElementById('id_max_wear').value = filter.max_wear;
+            document.getElementById('id_exterior').value = filter.exterior;
             
             showNotification('Filter loaded successfully', 'success');
-        } else {
-            showNotification('Error: ' + response.data.message, 'danger');
         }
-    } catch (error) {
-        console.error('Error loading filter:', error);
-        showNotification('Server error occurred', 'danger');
-    }
-});
-            
-            // Prevent delete button from triggering filter load
-            $('.delete-filter-btn').off('click').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                filterIdToDelete = $(this).data('filter-id');
-                $('#deleteFilterModal').modal('show');
-            });
+
+        function deleteFilter(filterId) {
+            filterIdToDelete = filterId;
+            showModal('deleteFilterModal');
         }
-        
-        // Initial binding
-        bindFilterClickEvents();
-        
-        // Helper functions
-        function updateScriptStatus(isRunning) {
-            if (isRunning) {
-                $('#statusIndicator').addClass('active');
-                $('#statusText').text('Script is running');
-                $('#stopButton').prop('disabled', false);
-                $('#startButton').prop('disabled', true);
-                $('#restartButton').prop('disabled', false);
+
+        function confirmDeleteFilter() {
+    if (!filterIdToDelete) return;
+    
+    $.ajax({
+        url: `/delete-filter/${filterIdToDelete}`,
+        type: 'POST',
+        success: function(response) {
+            if (response.status === 'success') {
+                // Remove from local array only after successful server deletion
+                savedFilters = savedFilters.filter(f => f.id !== filterIdToDelete);
+                renderSavedFilters();
+                closeModal('deleteFilterModal');
+                showNotification('Filter deleted successfully', 'success');
+                filterIdToDelete = null;
             } else {
-                $('#statusIndicator').removeClass('active');
-                $('#statusText').text('Script is stopped');
-                $('#stopButton').prop('disabled', true);
-                $('#startButton').prop('disabled', false);
-                $('#restartButton').prop('disabled', true);
+                closeModal('deleteFilterModal');
+                showNotification('Error: ' + response.message, 'danger');
+                filterIdToDelete = null;
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Delete Error:', error);
+            closeModal('deleteFilterModal');
+            showNotification('Server error occurred', 'danger');
+            filterIdToDelete = null;
+        }
+    });
+}
+
+        async function loadSavedFilters() {
+            try {
+                const response = await fetch('/get-filters');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                savedFilters = await response.json();
+                renderSavedFilters();
+                console.log("hallo")
+            } catch (error) {
+                console.error('Error loading saved filters:', error);
+                
+                savedFilters = [];
+                renderSavedFilters();
+                
+                showErrorMessage('Failed to load saved filters. Please try again.');
             }
         }
-        
-        function showNotification(message, type) {
-            const alert = $(`<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`);
-            
-            $('.messages').append(alert);
-            
-            setTimeout(function() {
-                alert.alert('close');
-            }, 5000);
-        }
-        
-        // Validate form data before submission
-        function validateFormData(formData) {
-            // Validate min/max price
-            if (formData.min_price && formData.max_price) {
-                if (parseFloat(formData.min_price) > parseFloat(formData.max_price)) {
-                    showNotification('Min price cannot be greater than max price', 'warning');
-                    return false;
-                }
-            }
-            
-            // Validate min/max wear
-            if (formData.min_wear && formData.max_wear) {
-                if (parseFloat(formData.min_wear) > parseFloat(formData.max_wear)) {
-                    showNotification('Min wear cannot be greater than max wear', 'warning');
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-        
-        // Check script status periodically
-        function checkScriptStatus() {
-            $.ajax({
-                url: window.location.href,
-                type: 'GET',
-                success: function(data) {
-                    const isRunning = $(data).find('#statusIndicator').hasClass('active');
-                    updateScriptStatus(isRunning);
-                }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
             });
         }
 
-        // Update button states on page load based on script status
-        function initializeButtonStates() {
-            const isRunning = $('#statusIndicator').hasClass('active');
-            updateScriptStatus(isRunning);
+        function renderSavedFilters() {
+            const container = document.getElementById('savedFiltersList');
+            
+            if (savedFilters.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No saved filters yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = savedFilters.map(filter => `
+                <div class="filter-item" onclick="loadFilter(${filter.id})">
+                    <div class="filter-item-header">
+                        <div class="filter-item-name">${filter.name}</div>
+                        <div class="filter-item-actions">
+                            <small class="filter-item-date">${formatDate(filter.created_at)}</small>
+                            <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteFilter(${filter.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
-        
-        // Initialize button states on page load
-        initializeButtonStates();
 
-        // Check status every 10 seconds
-        setInterval(checkScriptStatus, 10000);
-    });
-</script>
-{% endblock %}
+        function fetchScriptOutput() {
+            fetch("/get-script-output/")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('outputText').textContent = data.output;
+                });
+        }
+        setInterval(fetchScriptOutput, 5000);
+        window.onload = fetchScriptOutput;
+
+        // UI helper functions
+        function updateScriptStatus(isRunning) {
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+            const startBtn = document.getElementById('startButton');
+            const restartBtn = document.getElementById('restartButton');
+            const stopBtn = document.getElementById('stopButton');
+            
+            if (isRunning) {
+                indicator.classList.add('active');
+                text.textContent = 'Script is running';
+                startBtn.disabled = true;
+                restartBtn.disabled = false;
+                stopBtn.disabled = false;
+            } else {
+                indicator.classList.remove('active');
+                text.textContent = 'Script is stopped';
+                startBtn.disabled = false;
+                restartBtn.disabled = true;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+            }
+        });
+
+        // Add some interactive animations
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const deltaX = (x - centerX) / centerX;
+                    const deltaY = (y - centerY) / centerY;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${deltaY * 5}deg) rotateY(${deltaX * 5}deg) translateZ(10px)`;
+                } else {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

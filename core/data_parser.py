@@ -16,9 +16,9 @@ load_dotenv()
 
 API_URL = os.getenv('API_URL')
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+
 def resize_list(ls: list) -> list:
     return ls[-100:]
-
 
 async def monitor_sales():
     known_sales = []
@@ -37,7 +37,7 @@ async def monitor_sales():
                     if sId not in known_sales:
                         known_sales.append(sId)
                         s = sale['sale']  
-                        listing_text = f"{s['marketName']} - {s['wear']} - {s['salePrice']} EUR ({s['saleId']})"
+                        listing_text = f"{s['marketName']} - {s['wear']:.4f} - {s['salePrice'] / 100:.2f} EUR ({s['saleId']})"
 
                         if filter_item(sale=sale, query_params=query_params):
                             await send_to_discord(format_price(sale['sale']))
