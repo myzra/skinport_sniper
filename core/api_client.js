@@ -81,7 +81,6 @@ socket.on("saleFeed", (data) => {
       }
     });
     console.log("Filtered Live Sale Feed Data:", latestSales.length);
-    console.log(latestSales[0]) // debug
 
   }
 });
