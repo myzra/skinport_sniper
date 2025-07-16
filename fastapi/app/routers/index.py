@@ -72,7 +72,7 @@ async def start_script(request: Request):
         
         # Start api_client.js without parameters
         node_path = os.path.join(BASE_DIR, '..', '..', 'core', 'api_client.js')
-        node_proc = subprocess.Popen(['node', node_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        node_proc = subprocess.Popen(['node', node_path], stdout=None, stderr=None)
         
         # Start data_parser.py with path to JSON file as argument
         python_executable = sys.executable
