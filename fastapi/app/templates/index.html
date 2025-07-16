@@ -191,7 +191,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeEventListeners();
             loadSavedFilters();
-            startScriptOutputPolling();
+            checkScriptStatus();
+            startStatusPolling();
         });
 
         // Event listeners
@@ -203,6 +204,31 @@
             document.getElementById('clearFormButton').addEventListener('click', clearForm);
             document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteFilter);
         }
+
+        function checkScriptStatus() {
+            fetch('/get-script-status/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'running') {
+                        updateScriptStatus(true);
+                        scriptRunning = true;
+                    } else {
+                        updateScriptStatus(false);
+                        scriptRunning = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking script status:', error);
+                    updateScriptStatus(false);
+                    scriptRunning = false;
+                });
+        }
+
+        // Perodic status checking to keep UI in sync
+        function startStatusPolling() {
+            setInterval(checkScriptStatus, 5000); // Check every 5 seconds
+        }
+
 
         // Script control functions
         function startScript() {

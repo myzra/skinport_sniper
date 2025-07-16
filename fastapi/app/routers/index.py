@@ -391,3 +391,14 @@ async def get_saved_filters():
         raise HTTPException(status_code=500, detail="Invalid JSON file format")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading filters: {str(e)}")
+
+@router.get("/get-script-status")
+async def get_script_status():
+    """Get the current status of the script"""
+    try:
+        if is_script_running():
+            return JSONResponse({'status': 'running'})
+        else:
+            return JSONResponse({'status': 'stopped'})
+    except Exception as e:
+        return JSONResponse({'status': 'error', 'message': str(e)})
