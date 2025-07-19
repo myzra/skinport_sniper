@@ -10,6 +10,8 @@ import signal
 from typing import List, Dict, Any
 import psutil
 from datetime import datetime
+import time 
+import threading
 from .models import FilterForm, SaveFilterForm, FilterFormData, SaveFilterFormData, EXTERIOR_CHOICES
 
 router = APIRouter()
@@ -22,6 +24,9 @@ templates = Jinja2Templates(directory=templates_dir)
 # PID file path (adjust according to your project structure)
 PID_FILE = os.path.join(BASE_DIR, 'script_pids.json')
 FILTERS_FILE = os.path.join(BASE_DIR, 'saved_filters.json')
+
+restart_thread = None
+should_restart = False
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -45,6 +50,8 @@ async def index(request: Request):
 @router.post("/start-script")
 async def start_script(request: Request):
     """Start the Node.js and Python scripts"""
+    global restart_thread, should_restart
+
     try:
         # Get JSON data from request body
         data = await request.json()
@@ -70,27 +77,75 @@ async def start_script(request: Request):
         with open(os.path.join(BASE_DIR, 'script_params.json'), 'w') as f:
             json.dump(query_params, f)
         
-        # Start api_client.js without parameters
-        node_path = os.path.join(BASE_DIR, '..', '..', 'core', 'api_client.js')
-        node_proc = subprocess.Popen(['node', node_path], stdout=None, stderr=None)
-        
         # Start data_parser.py with path to JSON file as argument
         python_executable = sys.executable
         python_path = os.path.join(BASE_DIR, '..', '..', 'core', 'data_parser.py')
         py_proc = subprocess.Popen([python_executable, python_path], stdout=None, stderr=None)
 
+        # Start api_client.js without parameters
+        node_path = os.path.join(BASE_DIR, '..', '..', 'core', 'api_client.js')
+        node_proc = subprocess.Popen(['node', node_path], stdout=None, stderr=None)
+
         # Save PIDs to file
         with open(PID_FILE, 'w') as f:
             json.dump({'node_pid': node_proc.pid, 'python_pid': py_proc.pid}, f)
+        
+        # Set restart flag and start the restart thread
+        should_restart = True
+        restart_thread = threading.Thread(target=auto_restart_node_script, args=(node_path,))
+        restart_thread.daemon = True
+        restart_thread.start()
 
         return JSONResponse({'status': 'success', 'message': 'Script started successfully'})
     except Exception as e:
         return JSONResponse({'status': 'error', 'message': str(e)})
 
+def auto_restart_node_script(node_path):
+    """Background thread function to restart Node.js script every 30 minutes"""
+    global should_restart
+    
+    while should_restart:
+        # Wait for 30 minutes (1800 seconds)
+        time.sleep(1800)
+        
+        if not should_restart:
+            break
+            
+        try:
+            # Read current PIDs
+            if os.path.exists(PID_FILE):
+                with open(PID_FILE, 'r') as f:
+                    pids = json.load(f)
+                
+                # Kill the current Node.js process
+                node_pid = pids.get('node_pid')
+                if node_pid:
+                    try:
+                        os.kill(node_pid, signal.SIGTERM)
+                        # Wait a bit for the process to terminate
+                        time.sleep(2)
+                    except ProcessLookupError:
+                        pass  # Process already dead
+                
+                # Start a new Node.js process
+                node_proc = subprocess.Popen(['node', node_path], stdout=None, stderr=None)
+                
+                # Update the PID file with the new Node.js PID
+                pids['node_pid'] = node_proc.pid
+                with open(PID_FILE, 'w') as f:
+                    json.dump(pids, f)
+                    
+        except Exception as e:
+            print(f"Error during Node.js restart: {e}")
+
 @router.post("/stop-script")
 async def stop_script():
     """Stop the running scripts"""
+    global should_restart
+
     try:
+        should_restart = False
+        
         if not os.path.exists(PID_FILE):
             return JSONResponse({'status': 'error', 'message': 'No PID file found'})
         
