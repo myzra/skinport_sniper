@@ -1,66 +1,86 @@
-def filter_item(sale, query_params):
+def filter_item_single(sale, filter_params):
+    """Filter a single sale against a single filter configuration"""
     if sale["eventType"] != "listed":
         return False
-
+    
     item = sale["sale"]
-
+    
     # Min price
-    if query_params.get("minPrice"):
+    if filter_params.get("minPrice"):
         try:
-            if int(item.get("salePrice", 0)) < int(query_params["minPrice"]):
+            if int(item.get("salePrice", 0)) < int(filter_params["minPrice"]):
                 return False
         except ValueError:
             pass
-
+    
     # Max price
-    if query_params.get("maxPrice"):
+    if filter_params.get("maxPrice"):
         try:
-            if int(item.get("salePrice", 0)) > int(query_params["maxPrice"]):
+            if int(item.get("salePrice", 0)) > int(filter_params["maxPrice"]):
                 return False
         except ValueError:
             pass
-
-    # Name ("name contains" OR-Logic)
-    if query_params.get("names"):
-        name_filters = [n.strip().lower() for n in query_params["names"].split(",")]
+    
+    # Name (single name check)
+    if filter_params.get("name"):
+        filter_name = filter_params["name"].strip().lower()
         market_name = item.get("marketName", "").lower()
-        if not any(name in market_name for name in name_filters):
+        if filter_name not in market_name:
             return False
-
+    
     # Pattern ("pattern matches" OR-Logic)
-    if query_params.get("patterns"):
+    if filter_params.get("patterns"):
         try:
-            patterns = [int(p.strip()) for p in query_params["patterns"].split(",")]  # List of Numbers as integer
+            patterns = [int(p.strip()) for p in filter_params["patterns"].split(",")]
             item_pattern = item.get("pattern")
             if item_pattern is None or item_pattern not in patterns:
                 return False
         except ValueError:
             pass
-
+    
     # Min wear
-    if query_params.get("minWear"):
+    if filter_params.get("minWear"):
         try:
-            if float(item.get("wear", 1)) < float(query_params["minWear"]):
+            if float(item.get("wear", 1)) < float(filter_params["minWear"]):
                 return False
         except ValueError:
             pass
-
+    
     # Max wear
-    if query_params.get("maxWear"):
+    if filter_params.get("maxWear"):
         try:
-            if float(item.get("wear", 0)) > float(query_params["maxWear"]):
+            if float(item.get("wear", 0)) > float(filter_params["maxWear"]):
                 return False
         except ValueError:
             pass
-
+    
     # Exterior
-    if query_params.get("exterior"):
-        exterior_value = query_params["exterior"].strip().lower()
+    if filter_params.get("exterior"):
+        exterior_value = filter_params["exterior"].strip().lower()
         item_exterior = item.get("exterior", "").lower()
         if item_exterior != exterior_value:
             return False
-        
+    
     return True
+
+
+def filter_item(sale, query_params):
+    """Filter a sale against multiple filter configurations"""
+    # Handle both old and new format
+    if "filters" in query_params:
+        # New format with multiple filters
+        filters = query_params["filters"]
+        
+        # Check if sale matches ANY of the filters (OR logic between filters)
+        for filter_config in filters:
+            if filter_item_single(sale, filter_config):
+                return True, filter_config  # Return True and the matching filter
+        
+        return False, None
+    else:
+        # Old format compatibility
+        result = filter_item_single(sale, query_params)
+        return result, query_params if result else None
 
 '''
 query_params = {

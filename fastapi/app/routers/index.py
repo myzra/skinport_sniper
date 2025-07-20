@@ -55,23 +55,50 @@ async def start_script(request: Request):
     try:
         # Get JSON data from request body
         data = await request.json()
-        query_params = {}
         
-        # Build query_params dictionary from form data
-        if data.get('names'):
-            query_params['names'] = data.get('names')
-        if data.get('min_price'):
-            query_params['minPrice'] = data.get('min_price')
-        if data.get('max_price'):
-            query_params['maxPrice'] = data.get('max_price')
-        if data.get('patterns'):
-            query_params['patterns'] = data.get('patterns')
-        if data.get('min_wear'):
-            query_params['minWear'] = data.get('min_wear')
-        if data.get('max_wear'):
-            query_params['maxWear'] = data.get('max_wear')
-        if data.get('exterior'):
-            query_params['exterior'] = data.get('exterior')
+        # Extract filters array from the request
+        filters = data.get('filters', [])
+        
+        if not filters:
+            return JSONResponse({'status': 'error', 'message': 'No filters provided'})
+        
+        # Process each filter individually and build query_params
+        processed_filters = []
+        
+        for filter_item in filters:
+            filter_params = {}
+            
+            # Add name (required)
+            if filter_item.get('name'):
+                filter_params['name'] = filter_item.get('name')
+            else:
+                continue  # Skip filters without names
+            
+            # Add other parameters if they exist and are not empty
+            if filter_item.get('min_price') and filter_item.get('min_price').strip():
+                filter_params['minPrice'] = filter_item.get('min_price')
+            
+            if filter_item.get('max_price') and filter_item.get('max_price').strip():
+                filter_params['maxPrice'] = filter_item.get('max_price')
+            
+            if filter_item.get('patterns') and filter_item.get('patterns').strip():
+                filter_params['patterns'] = filter_item.get('patterns')
+            
+            if filter_item.get('min_wear') and filter_item.get('min_wear').strip():
+                filter_params['minWear'] = filter_item.get('min_wear')
+            
+            if filter_item.get('max_wear') and filter_item.get('max_wear').strip():
+                filter_params['maxWear'] = filter_item.get('max_wear')
+            
+            if filter_item.get('exterior') and filter_item.get('exterior').strip():
+                filter_params['exterior'] = filter_item.get('exterior')
+            
+            processed_filters.append(filter_params)
+        
+        # Structure the data for the script
+        query_params = {
+            'filters': processed_filters
+        }
         
         # Write query_params to a file that the script can read
         with open(os.path.join(BASE_DIR, 'script_params.json'), 'w') as f:
