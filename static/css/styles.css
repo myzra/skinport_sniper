@@ -114,6 +114,11 @@ body {
     transform: translateY(-4px);
     box-shadow: var(--shadow-heavy);
     border-color: rgba(187, 134, 252, 0.3);
+    pointer-events: auto;
+}
+
+.card:hover .btn {
+    pointer-events: auto;
 }
 
 .card:hover::before {
@@ -205,6 +210,8 @@ body {
     text-decoration: none;
     position: relative;
     overflow: hidden;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .btn::before {

@@ -289,8 +289,8 @@ async def save_filter(request: Request):
         # Create filter setting object - make sure we're getting the right keys
         filter_data = {
             'id': generate_filter_id(),
-            'name': filter_name,
-            'names': data.get('names', ''),
+            'fname': filter_name,
+            'name': data.get('name', ''),
             'min_price': data.get('min_price', ''),
             'max_price': data.get('max_price', ''),
             'patterns': data.get('patterns', ''),

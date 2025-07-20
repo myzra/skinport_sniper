@@ -115,7 +115,7 @@ class FilterForm:
         self.is_valid_form = True
         
         self.fields = {
-            'names': FormField(
+            'name': FormField(
                 'text',
                 required=False,
                 **{
@@ -181,7 +181,6 @@ class FilterForm:
         for field_name, field in self.fields.items():
             field.value = self.data.get(field_name, '')
             field.name = field_name
-            field.name = field_name
     
     def __getattr__(self, name):
         if name in self.fields:
@@ -210,7 +209,7 @@ class SaveFilterForm:
                     'placeholder': 'Filter name',
                 }
             ),
-            'names': FormField('hidden'),
+            'name': FormField('hidden'),
             'min_price': FormField('hidden'),
             'max_price': FormField('hidden'),
             'patterns': FormField('hidden'),
