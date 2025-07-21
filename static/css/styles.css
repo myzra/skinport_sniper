@@ -83,9 +83,16 @@ body {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 8fr 1fr; /* Even narrower sidebar */
     gap: 2rem;
     align-items: start;
+}
+
+@media (min-width: 769px) {
+    .sidebar .card {
+        width: 130%; /* Makes cards 50% wider than sidebar */
+        margin: 0 auto;
+    }
 }
 
 .card {
@@ -581,5 +588,199 @@ body {
     
     .control-buttons .btn-group {
         justify-content: center;
+    }
+}
+
+/* Active Filters Container */
+.active-filters-container {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+
+.active-filters-container::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Chrome/Safari/Edge */
+}
+
+/* Filter Cards */
+.filter-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(187, 134, 252, 0.03) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.filter-card:hover {
+    border-color: rgba(187, 134, 252, 0.4);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.filter-card:hover::before {
+    opacity: 1;
+}
+
+/* Filter Card Header */
+.filter-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-card-header h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    background: linear-gradient(135deg, var(--text-primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.filter-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.filter-card-actions .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+/* Filter Card Body */
+.filter-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-detail {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.filter-detail strong {
+    color: var(--primary-color);
+    font-weight: 500;
+    min-width: 80px;
+    margin-right: 0.5rem;
+}
+
+/* Outline Button Variants for Filter Cards */
+.btn-outline-primary {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+}
+
+/* Responsive Design for Filter Cards */
+@media (max-width: 768px) {
+    .filter-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .filter-card-actions {
+        align-self: flex-end;
+    }
+    
+    .filter-detail {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .filter-detail strong {
+        min-width: auto;
+        margin-right: 0;
+    }
+}
+
+/* Mobile Button Fix - Make control buttons full width and equal */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .control-buttons .btn-group {
+        justify-content: center;
+        display: flex;
+        flex-direction: row; /* Keep start and restart buttons side by side */
+        gap: 0.75rem;
+        width: 100%;
+    }
+    
+    /* Make start and restart buttons equal width, stop button centered below */
+    .control-buttons .btn-group .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    /* Make stop button narrower and centered below */
+    .control-buttons > .btn-danger {
+        width: 60%; /* Changed from 100% to 60% */
+        justify-content: center;
+        align-self: center; /* Added to center the button */
     }
 }
