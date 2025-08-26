@@ -19,6 +19,12 @@ It listens to Skinport's WebSocket stream in real time and filters items based o
 - 🕵️ Real-time item tracking
 - 💾 Filter management with persistent storage
 
+## 📸 Screenshots
+<div style="display: flex; gap: 10px;">
+  <img src="docs/skinport_sniper_demo_1.png" alt="1" width="800"/>
+  <img src="docs/skinport_sniper_demo_2.png" alt="2" width="800"/>
+</div>
+
 # 🚀 How to use it:
 ## 🛠 Requirements
 > [!NOTE]
@@ -152,3 +158,4 @@ API_URL=http://localhost:3000/skinport-live
 
 Created by [myzra](https://github.com/myzra) \
 [Licensed under the MIT License](LICENSE)
+
